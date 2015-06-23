@@ -1,0 +1,24 @@
+package sn.ucad.esp.master;
+
+public class Fichier {
+	 
+	    private String       description;
+	   
+	    private UploadedFile contenu;
+
+	    public String getDescription() {
+	        return description;
+	    }
+
+	    public void setDescription( String description ) {
+	        this.description = description;
+	    }
+
+	    public UploadedFile getContenu() {
+	        return contenu;
+	    }
+
+	    public void setContenu( UploadedFile contenu ) {
+	        this.contenu = contenu;
+	    }
+}

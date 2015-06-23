@@ -1,0 +1,8 @@
+package com.curiosity.kuiper.ihm;
+
+import sn.ucad.esp.master.FrmChat;
+
+public class Central {
+ FrmChat chat;
+ 
+}

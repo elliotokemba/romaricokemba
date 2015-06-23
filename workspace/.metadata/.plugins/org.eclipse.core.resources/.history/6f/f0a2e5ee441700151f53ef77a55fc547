@@ -1,0 +1,317 @@
+package com.curiosity.kuiper.ihm;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+
+import java.awt.Toolkit;
+import java.awt.SystemColor;
+
+import javax.swing.JLabel;
+
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+import javax.swing.JTextField;
+import javax.swing.JPasswordField;
+
+import sn.ucad.esp.master.Enveloppe;
+import sn.ucad.esp.master.FrmChat;
+import sn.ucad.esp.master.Message;
+import sn.ucad.esp.master.ReceiverClient;
+import sn.ucad.esp.master.Utilisateur;
+
+public class FrmStart extends JDialog {
+	private static Thread clientTheard;
+	private final JPanel contentPanel = new JPanel();
+	private JTextField txtLogin;
+	private JPasswordField txtMDP;
+	private JTextField fieldPseudo;
+	private JPasswordField fieldPwd;
+	private JButton btnValider;
+	private Socket socket;
+	
+	private JButton okButton ;
+	private JPasswordField fieldConfirmation;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		try {
+			FrmStart dialog = new FrmStart();
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			
+			dialog.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+
+	/**
+	 * Create the dialog.
+	 */
+	public FrmStart() {
+	
+		setTitle("Bienvenue");
+		setResizable(false);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(FrmStart.class.getResource("/com/curiosity/kuiper/ihm/start.png")));
+		setBounds(100, 100, 471, 293);
+		getContentPane().setLayout(new BorderLayout());
+		contentPanel.setForeground(Color.WHITE);
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		contentPanel.setLayout(null);
+		
+		JPanel panel = new JPanel();
+		panel.setBounds(0, -11, 471, 60);
+		panel.setBackground(new Color(153, 153, 204));
+		contentPanel.add(panel);
+		panel.setLayout(null);
+		this.setLocationRelativeTo(null);
+		{
+			JLabel lblKuiper = new JLabel("Kuiper");
+			lblKuiper.setForeground(Color.WHITE);
+			lblKuiper.setFont(new Font("Dialog", Font.BOLD, 18));
+			lblKuiper.setBounds(12, 12, 102, 36);
+			panel.add(lblKuiper);
+		}
+		
+		txtLogin = new JTextField();
+		txtLogin.setBounds(100, 22, 131, 19);
+		panel.add(txtLogin);
+		txtLogin.setColumns(10);
+		{
+			txtMDP = new JPasswordField();
+			txtMDP.setBounds(243, 22, 116, 19);
+			panel.add(txtMDP);
+		}
+		
+		 btnValider = new JButton("Valider");
+		btnValider.setBounds(371, 19, 88, 25);
+		panel.add(btnValider);
+		{
+			JPanel panel_1 = new JPanel();
+			panel_1.setBounds(12, 74, 471, 170);
+			contentPanel.add(panel_1);
+			panel_1.setLayout(null);
+			{
+				JLabel lblInscription = new JLabel("Inscription");
+				lblInscription.setFont(new Font("Dialog", Font.BOLD, 15));
+				lblInscription.setBounds(112, 12, 224, 34);
+				panel_1.add(lblInscription);
+			}
+			{
+				JLabel lblVosAmisVous = new JLabel("Vos amis vous attendent, en plus c'est gratuit");
+				lblVosAmisVous.setBounds(112, 46, 347, 15);
+				panel_1.add(lblVosAmisVous);
+			}
+			{
+				fieldPseudo = new JTextField();
+				fieldPseudo.setBounds(193, 73, 164, 19);
+				panel_1.add(fieldPseudo);
+				fieldPseudo.setColumns(10);
+			}
+			{
+				fieldPwd = new JPasswordField();
+				fieldPwd.setBounds(193, 104, 164, 19);
+				panel_1.add(fieldPwd);
+			}
+			
+			fieldConfirmation = new JPasswordField();
+			fieldConfirmation.setBounds(193, 135, 164, 19);
+			panel_1.add(fieldConfirmation);
+			
+			JLabel lblVotrePseudo = new JLabel("Votre Pseudo:");
+			lblVotrePseudo.setBounds(33, 75, 142, 15);
+			panel_1.add(lblVotrePseudo);
+			
+			JLabel lblMotDePasse = new JLabel("Mot de Passe:");
+			lblMotDePasse.setBounds(33, 106, 107, 15);
+			panel_1.add(lblMotDePasse);
+			{
+				JLabel lblConfirmation = new JLabel("Confirmation:");
+				lblConfirmation.setBounds(33, 137, 117, 15);
+				panel_1.add(lblConfirmation);
+			}
+		}
+		
+		JLabel label = new JLabel("New label");
+		label.setBounds(56, 208, 70, 38);
+		contentPanel.add(label);
+		{
+			JPanel buttonPane = new JPanel();
+			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+			getContentPane().add(buttonPane, BorderLayout.SOUTH);
+			{
+				 okButton = new JButton("Inscription");
+				okButton.setActionCommand("OK");
+				buttonPane.add(okButton);
+				getRootPane().setDefaultButton(okButton);
+				okButton.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						
+					}
+				});
+			}
+			{
+				JButton cancelButton = new JButton("Annuler");
+				cancelButton.setActionCommand("Cancel");
+				buttonPane.add(cancelButton);
+			}
+		}
+		
+		btnValider.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				try {
+					if (txtLogin.getText().isEmpty()){
+						throw new Exception("Entrez votre compte");
+					}
+					
+					if (txtMDP.getText().isEmpty()){
+						throw new Exception("Entrez votre mot de Passe");
+					}
+					
+
+					Enveloppe enveloppe=new Enveloppe();
+					enveloppe.setInstruction("LOGIN");
+				
+			
+					Utilisateur emetteur=new Utilisateur();
+		
+					emetteur.setNom(txtLogin.getText());
+					emetteur.setCle(txtMDP.getText());
+					enveloppe.setEmetteur(emetteur);
+					
+					
+					ObjectOutputStream os=new ObjectOutputStream(socket.getOutputStream());
+					os.writeObject(enveloppe);
+					os.flush();
+					ObjectInputStream is=new ObjectInputStream(socket.getInputStream());
+				
+						enveloppe=(Enveloppe) is.readObject();
+						if (enveloppe.getInstruction().equalsIgnoreCase("Ok")){
+							
+							Central central=new Central();
+							FrmChat f=new FrmChat(txtLogin.getText(),socket,central);
+							central.setChat(f);
+				
+							clientTheard= new Thread(new ReceiverClient(f, socket));
+							clientTheard.start();
+							f.setVisible(true);
+							dispose();
+						}else{
+							
+							throw new Exception("Votre session est érronée");
+							
+						}
+					
+					
+				
+				} catch (Exception e2) {
+					JOptionPane.showMessageDialog(null, e2.getMessage());
+				}
+		
+				
+			}
+		});
+		
+		okButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					if (fieldPseudo.getText().isEmpty()){
+						throw new Exception("Entrez votre Compte");
+						
+					}
+					
+					if (fieldPwd.getText().isEmpty()){
+						throw new Exception("Entrez votre mot de Passe");
+						
+					}
+					
+					if (!fieldPwd.getText().equalsIgnoreCase(fieldConfirmation.getText())){
+						throw new Exception("Les deux mots de passe differents");
+						
+					}
+					
+
+					Enveloppe enveloppe=new Enveloppe();
+					enveloppe.setInstruction("ACCOUNT");
+					Message message=new Message();
+			
+			
+					Utilisateur emetteur=new Utilisateur();
+		
+					emetteur.setNom(fieldPseudo.getText());
+					emetteur.setCle(fieldPwd.getText());
+					enveloppe.setEmetteur(emetteur);
+					
+					try {
+						ObjectOutputStream os=new ObjectOutputStream(socket.getOutputStream());
+						os.writeObject(enveloppe);
+						os.flush();
+						ObjectInputStream is=new ObjectInputStream(socket.getInputStream());
+						try {
+							enveloppe=(Enveloppe) is.readObject();
+							if (enveloppe.getInstruction().equalsIgnoreCase("Ok")){
+								JOptionPane.showMessageDialog(null, "Compte cré avec succès !!!");
+							}else{
+								JOptionPane.showMessageDialog(null, "Ce compte existe deja");
+							}
+						} catch (ClassNotFoundException e1) {
+							JOptionPane.showMessageDialog(null, e1.getMessage());
+						}
+						
+					} catch (IOException e1) {
+						JOptionPane.showMessageDialog(null, e1.getMessage());
+					}catch (Exception e2) {
+						JOptionPane.showMessageDialog(null, e2.getMessage());
+					}
+					
+					
+					
+				} catch (Exception e2) {
+					JOptionPane.showMessageDialog(null, e2.getMessage());
+				}
+				
+				
+			}
+		});
+		//
+		try {
+			socket=new Socket("127.0.0.1", 1086);
+			
+//			 clientTheard.start();
+		} catch (UnknownHostException e) {
+			
+			e.printStackTrace();
+		} catch (IOException e) {
+		
+			e.printStackTrace();
+		}
+		
+	}
+}

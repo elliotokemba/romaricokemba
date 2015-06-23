@@ -1,0 +1,135 @@
+package sn.ucad.esp.master;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProcessusServeur implements Runnable{
+	
+	private Socket socket;
+	
+	private ObjectOutputStream os;
+	
+	private ObjectInputStream is;
+	
+	private static List<Socket> lstSocket=new ArrayList<Socket>();
+	
+	private static List<String> lstUsr=new ArrayList<String>();
+
+	public ProcessusServeur(Socket socket) {
+
+		this.socket = socket;
+		
+		lstSocket.add(socket);
+	}
+
+
+	@Override
+	public void run() {
+		while (true){
+			try {
+				is=new ObjectInputStream(socket.getInputStream());
+				try {
+					Enveloppe enveloppe=(Enveloppe) is.readObject();
+					if (enveloppe.getInstruction().equalsIgnoreCase("MSG") || enveloppe.getInstruction().equalsIgnoreCase("SMILEY") || enveloppe.getInstruction().equalsIgnoreCase("TEL")){
+						envoyer(enveloppe);
+						
+					}else if (enveloppe.getInstruction().equalsIgnoreCase("LOGIN")){
+						
+						//On crée un compte
+						boolean trouver=DaoServer.rechercherCompte(enveloppe.getEmetteur().getNom(), enveloppe.getEmetteur().getCle());
+						
+						if (trouver==true){
+							lstUsr.add(enveloppe.getEmetteur().getNom());
+							
+						}
+						
+						enveloppe.setLstUtilisateur(lstUsr);
+						
+						if (trouver==true){
+							enveloppe.setInstruction("OK");
+					
+							envoyer(enveloppe);
+							
+						}else{
+						
+							enveloppe.setInstruction("KO");
+							envoyer(enveloppe);
+						}
+						
+						
+					}else if (enveloppe.getInstruction().equalsIgnoreCase("ACCOUNT")){
+						//On crée un compte
+						boolean trouver=DaoServer.creerCompte(enveloppe.getEmetteur().getNom(), enveloppe.getEmetteur().getCle());
+						
+						if (trouver==true){
+							enveloppe.setInstruction("OK");
+							
+							os=new ObjectOutputStream(socket.getOutputStream());
+							os.writeObject(enveloppe);
+							os.flush();
+						}else{
+							Enveloppe en=new Enveloppe();
+							os=new ObjectOutputStream(socket.getOutputStream());
+							en.setInstruction("KO");
+							os.writeObject(en);
+							os.flush();
+						}
+							
+				
+					}else if (enveloppe.getInstruction().equalsIgnoreCase("ECRIT")){
+						envoyer(enveloppe);
+					}else if (enveloppe.getInstruction().equalsIgnoreCase("FILES")){
+						
+						envoyer(enveloppe);
+						
+						//
+//						FileDialog fd=new FileDialog(ci,"Telecharger un Fichier",java.awt.FileDialog.SAVE);
+//						fd.setFile(nomFile);
+//						fd.show();
+					//
+//						try {
+//						OutputStream fos=new FileOutputStream(fd.getDirectory()+fd.getFile());
+//						fos.write(cont);
+//						fos.close();
+//						}
+//						catch (Exception ex)
+////						{
+////						System.out.println("erreur "+ex);
+////						}
+//						//envoyer(enveloppe);
+//						 FileOutputStream fileOuputStream = 
+//				                  new FileOutputStream("/home/elliot/Bureau/testing2.txt"); 
+//					    fileOuputStream.write(enveloppe.getbFile());
+//					    fileOuputStream.close();
+					}
+				} catch (ClassNotFoundException e) {
+					
+				}
+				
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void envoyer(Enveloppe  enveloppe){
+		
+		for(Socket s:lstSocket){
+			try {
+				os=new ObjectOutputStream(s.getOutputStream());
+				os.writeObject(enveloppe);
+				os.flush();
+			} catch (IOException e) {
+				
+			}
+		}  
+		
+	}
+
+}
